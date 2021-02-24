@@ -1,8 +1,12 @@
 class ApplicationController < ActionController::Base
+  #レイアウトをどのメソッド決めるか
   layout :set_layout
 
-  #StandardErrorがあったら、rescue500メソッドを呼び出す
-  rescue_from StandardError, with: :rescue500
+  # エラークラスを定義する
+  class Forbidden < ActionController::ActionControllerError; end
+  class IpAddressRejected < ActionController::ActionControllerError; end
+
+  include ErrorHanlers if Rails.env.production?
 
   private def set_layout
     if params[:controller].match(%r{\A(staff|admin|customer)/})
@@ -10,10 +14,5 @@ class ApplicationController < ActionController::Base
     else
       "customer"
     end
-  end
-
-  #StandardErrorがあったときに表示されるページの設定
-  private def rescue500(e)
-    render "errors/internal_server_error", status: 500
   end
 end
